@@ -117,19 +117,29 @@ def cp_resident_scheduler(residents, teams, weekends, calls, time_off, roles, se
   else:
     print("Unknown (might exist, not found yet)")
 
+  schedule = {}
   if result == cp_model.OPTIMAL or result == cp_model.FEASIBLE:
     for w in weekends:
       print(f"\nWeekend {w+1}")
+      schedule[w+1] = {}
       for c in calls:
         assigned = [r for r in residents if solver.Value(x[(r,w,c)]) == 1]
+        schedule[w+1][c] = assigned
         print(f"  Call {c}: {assigned}")
       rounding = [s for s in seniors if solver.Value(y[(s,w)]) == 1]
+      schedule[w+1]['rounding'] = rounding
       print(f"Rounding: {rounding}")
 
-  return result, solver
+  """{"1":{
+          "callA":[assigned],
+          "callB:[assigned]",
+          "rounding":[rounding]},
+      "2":{...}
+      }"""
+  return schedule
 
 
-# result, solver = cp_resident_scheduler(residents=residents,
+# schedule = cp_resident_scheduler(residents=residents,
 #                                        teams=teams,
 #                                        weekends=weekends, 
 #                                        calls=calls, 
