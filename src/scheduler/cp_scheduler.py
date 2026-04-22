@@ -104,7 +104,7 @@ def cp_resident_scheduler(residents, teams, weekends, calls, time_off, roles, se
   # -----------------------------
   solver = cp_model.CpSolver()
   solver.parameters.linearization_level = 0
-  # Enumerate all solutions.
+  # Enumerate all solutions. Set as Bool flag, if no optimal enumerate all.
   # solver.parameters.enumerate_all_solutions = True
   solver.parameters.max_time_in_seconds = 45
   result = solver.Solve(model)
@@ -120,15 +120,16 @@ def cp_resident_scheduler(residents, teams, weekends, calls, time_off, roles, se
   schedule = {}
   if result == cp_model.OPTIMAL or result == cp_model.FEASIBLE:
     for w in weekends:
-      print(f"\nWeekend {w+1}")
-      schedule[w+1] = {}
+      # print(f"\nWeekend {w+1}")
+      weekend = f"weekend{w+1}"
+      schedule[weekend] = {}
       for c in calls:
         assigned = [r for r in residents if solver.Value(x[(r,w,c)]) == 1]
-        schedule[w+1][c] = assigned
-        print(f"  Call {c}: {assigned}")
+        schedule[weekend][c] = assigned
+        # print(f"  Call {c}: {assigned}")
       rounding = [s for s in seniors if solver.Value(y[(s,w)]) == 1]
-      schedule[w+1]['rounding'] = rounding
-      print(f"Rounding: {rounding}")
+      schedule[weekend]['rounding'] = rounding
+      # print(f"Rounding: {rounding}")
 
   """{"1":{
           "callA":[assigned],
