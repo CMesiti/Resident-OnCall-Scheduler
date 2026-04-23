@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from collections import defaultdict
-
+from scheduler.cp_scheduler import cp_resident_scheduler
 # ─── Page Config ─────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Call Schedule",
@@ -14,7 +14,6 @@ st.set_page_config(
 def load_css(path):
     with open(path) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
 load_css("styles.css")
 
 # ─── Input Data ───────────────────────────────────────────────────────────────
@@ -25,37 +24,10 @@ INPUT_DATA = {
     "teams": {"Red":["S4: Nageeb","J22: Getzinger","J32: Vadnala"],"Aqua":["M17: Najor","M18: Butler"],"Vascular":["S10: Robbe","J37: Rotator 3"],"Yellow":["S5: LeMarbe","J34: Morrison"],"Orange":["S7: Baida","J23: Faraj"],"Pink":["S1: Mesiti","J27: Gibbons"],"Gold":["S8: Waleizer","M15: Kowalczyk","J35: Rotator 1"],"Thoracic":["S2: Applegarth","J28: Sancraint","J36: Rotator 2"],"Purple":["S9: Haj Assad","J21: Hunyadi"],"Peds":["M13: Dowding","J30: Sturtevant"]},
     "time_off": [["S2: Applegarth",0],["S1: Mesiti",1],["J34: Morrison",0],["J27: Gibbons",0],["M14: Hurst",2],["J22: Getzinger",2],["S2: Applegarth",1],["S12: Teitlebaum",0],["S6: Sobolic",1]],
     "seniors": ["S1: Mesiti","S2: Applegarth","S4: Nageeb","S5: LeMarbe","S6: Sobolic","S7: Baida","S8: Waleizer","S9: Haj Assad","S10: Robbe","S11: Aung","S12: Teitlebaum"],
+    "weekends":[0,1,2,3],
+    "calls":["A", "B"],
 }
-
-# ─── Scheduler call stub ──────────────────────────────────────────────────────
-# Replace this with: from your_module import cp_scheduler
-def cp_scheduler(input_data):
-    """Stub that returns the known output. Replace with your real function."""
-    return {
-        "weekend1": {
-            "A":        ["S5: LeMarbe","M13: Dowding","J21: Hunyadi","J23: Faraj","J33: Wolf","J36: Rotator 2"],
-            "B":        ["S8: Waleizer","M17: Najor","J22: Getzinger","J37: Rotator 3","J38: Rotator 4"],
-            "rounding": ["S1: Mesiti"],
-        },
-        "weekend2": {
-            "A":        ["S4: Nageeb","M18: Butler","J22: Getzinger","J23: Faraj","J30: Sturtevant"],
-            "B":        ["S10: Robbe","M14: Hurst","M15: Kowalczyk","J27: Gibbons","J28: Sancraint","J34: Morrison"],
-            "rounding": ["S9: Haj Assad"],
-        },
-        "weekend3": {
-            "A":        ["S9: Haj Assad","M17: Najor","J34: Morrison","J35: Rotator 1","J36: Rotator 2"],
-            "B":        ["S1: Mesiti","M15: Kowalczyk","J30: Sturtevant","J32: Vadnala","J33: Wolf"],
-            "rounding": ["S7: Baida","S10: Robbe"],
-        },
-        "weekend4": {
-            "A":        ["S7: Baida","M18: Butler","M19: Davis","J27: Gibbons","J32: Vadnala","J35: Rotator 1","J37: Rotator 3"],
-            "B":        ["S12: Teitlebaum","M13: Dowding","J21: Hunyadi","J28: Sancraint","J38: Rotator 4"],
-            "rounding": ["S5: LeMarbe"],
-        },
-    }
-
 # ─── Helpers ──────────────────────────────────────────────────────────────────
-
 ROLE_CHIP = {"senior":"chip-senior","mid":"chip-mid","junior":"chip-junior","research":"chip-research"}
 CALL_LABEL = {"A":"call-A","B":"call-B","rounding":"call-R"}
 CALL_DISPLAY = {"A":"A-Call","B":"B-Call","rounding":"Rounding"}
@@ -90,6 +62,10 @@ def build_counts(schedule):
 def build_time_off_set():
     return {(r, wk) for r, wk in INPUT_DATA["time_off"]}
 
+def add_resident():
+    r = st.session_state['resident_input']
+    st.session_state['INPUT_DATA']['residents'].append(r)
+
 # ─── Session state ────────────────────────────────────────────────────────────
 if "schedule" not in st.session_state:
     st.session_state.schedule = None
@@ -98,10 +74,10 @@ if "schedule" not in st.session_state:
 with st.sidebar:
     st.markdown("### 🔵 Call Schedule")
     st.markdown("---")
-
     if st.button("▶  Run cp_scheduler"):
         with st.spinner("Running scheduler…"):
-            st.session_state.schedule = cp_scheduler(INPUT_DATA)
+            INPUT_DATA['time_off'] = build_time_off_set()
+            st.session_state.schedule = cp_resident_scheduler(**INPUT_DATA)
 
     if st.session_state.schedule:
         st.markdown("---")
@@ -133,23 +109,57 @@ with st.sidebar:
 
 st.markdown('<div class="page-title">Call Schedule</div>', unsafe_allow_html=True)
 st.markdown('<div class="page-sub">Surgical Residency · Weekend Coverage · 4 Weeks</div>', unsafe_allow_html=True)
+tab_input, tab1, tab2, tab3 = st.tabs(["INPUT","WEEKEND VIEW", "RESIDENT SUMMARY", "FULL TABLE"])
+# Manual Input/CSV Import
+with tab_input:
+    st.session_state['INPUT_DATA'] = {
+    "residents": [],
+    "roles": {},
+    "teams": {},
+    "time_off": [],
+    "seniors": [],
+    "weekends":[0,1,2,3],
+    "calls":["A", "B"],
+    }
+    st.text_input(label="Enter A Resident",
+                  placeholder="Mark", 
+                  key='resident_input')
+    st.button(label = "Add Resident", on_click=add_resident)
+    st.session_state['INPUT_DATA']
+# Give option to export manual import as CSV for later.
 
+#button not clicked yet
 if not st.session_state.schedule:
-    st.markdown("""
-    <div style="text-align:center; padding:4rem 2rem; color:#7a746e;">
-      <div style="font-family:'Syne',sans-serif; font-size:3rem; font-weight:800; color:#cdc7ba; margin-bottom:0.5rem;">→</div>
-      <div style="font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:700; color:#1a1814; margin-bottom:0.4rem;">Ready to load schedule</div>
-      <div style="font-family:'Syne Mono',monospace; font-size:0.75rem; letter-spacing:0.08em;">Click ▶ Run cp_scheduler in the sidebar</div>
-    </div>
-    """, unsafe_allow_html=True)
+    with tab1:
+        st.markdown("""
+        <div style="text-align:center; padding:4rem 2rem; color:#7a746e;">
+        <div style="font-family:'Syne',sans-serif; font-size:3rem; font-weight:800; color:#cdc7ba; margin-bottom:0.5rem;">→</div>
+        <div style="font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:700; color:#1a1814; margin-bottom:0.4rem;">Ready to load schedule</div>
+        <div style="font-family:'Syne Mono',monospace; font-size:0.75rem; letter-spacing:0.08em;">Click ▶ Run cp_scheduler in the sidebar</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with tab2:
+        st.markdown("""
+        <div style="text-align:center; padding:4rem 2rem; color:#7a746e;">
+        <div style="font-family:'Syne',sans-serif; font-size:3rem; font-weight:800; color:#cdc7ba; margin-bottom:0.5rem;">→</div>
+        <div style="font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:700; color:#1a1814; margin-bottom:0.4rem;">Ready to load schedule</div>
+        <div style="font-family:'Syne Mono',monospace; font-size:0.75rem; letter-spacing:0.08em;">Click ▶ Run cp_scheduler in the sidebar</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with tab3:
+        st.markdown("""
+        <div style="text-align:center; padding:4rem 2rem; color:#7a746e;">
+        <div style="font-family:'Syne',sans-serif; font-size:3rem; font-weight:800; color:#cdc7ba; margin-bottom:0.5rem;">→</div>
+        <div style="font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:700; color:#1a1814; margin-bottom:0.4rem;">Ready to load schedule</div>
+        <div style="font-family:'Syne Mono',monospace; font-size:0.75rem; letter-spacing:0.08em;">Click ▶ Run cp_scheduler in the sidebar</div>
+        </div>
+        """, unsafe_allow_html=True)
     st.stop()
 
 sched = st.session_state.schedule
 counts = build_counts(sched)
 role_filter = st.session_state.get("role_filter", ["senior","mid","junior","research"])
 time_off_set = build_time_off_set()
-
-tab1, tab2, tab3 = st.tabs(["WEEKEND VIEW", "RESIDENT SUMMARY", "FULL TABLE"])
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 1 — WEEKEND VIEW
@@ -300,7 +310,7 @@ with tab3:
                 })
 
     df = pd.DataFrame(flat_rows)
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    st.dataframe(df, width='stretch', hide_index=True)
 
     st.markdown("---")
     st.markdown("##### Call Count Summary")
@@ -321,7 +331,7 @@ with tab3:
             "Total": c["total"],
         })
     summary_rows.sort(key=lambda x: -x["Total"])
-    st.dataframe(pd.DataFrame(summary_rows), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(summary_rows), width='stretch', hide_index=True)
 
     st.markdown("---")
     csv = df.to_csv(index=False)
