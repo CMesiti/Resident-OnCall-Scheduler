@@ -18,7 +18,7 @@ def cp_resident_scheduler(residents, teams, weekends, calls, time_off, roles, se
   for w in weekends:
     for c in calls:
       senior_count = sum(x[(r,w,c)] for r in residents if roles[r]=='senior') #how many seniors on call
-      mid_count = sum(x[(r,w,c)] for r in residents if roles[r]=='mid')
+      mid_count = sum(x[(r,w,c)] for r in residents if roles[r]=='mid' or roles[r]=='research')
       junior_count = sum(x[(r,w,c)] for r in residents if roles[r]=='junior')
       total_count = sum(x[(r,w,c)] for r in residents) # how many residents in total
 

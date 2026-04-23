@@ -62,13 +62,33 @@ def build_counts(schedule):
 def build_time_off_set():
     return {(r, wk) for r, wk in INPUT_DATA["time_off"]}
 
+def get_data():
+    return st.session_state['input_data']
+
+# Input Helpers
 def add_resident():
-    r = st.session_state['resident_input']
-    st.session_state['INPUT_DATA']['residents'].append(r)
+    res = st.session_state['resident_input'].strip()
+    role = st.session_state['role_input']
+    prefix_map = {'senior':'S', 'mid':'M', 'research':'R', 'junior':'J'}
+    full_res = prefix_map.get(role, 'J')+f"{res}"
+    get_data()['residents'].append(full_res)
+    get_data()['roles'][full_res] = role
+    if role=='senior':
+        get_data()['seniors'].append(full_res)
 
 # ─── Session state ────────────────────────────────────────────────────────────
 if "schedule" not in st.session_state:
     st.session_state.schedule = None
+if 'input_data' not in st.session_state:
+    st.session_state['input_data'] =  {
+        "residents": [],
+        "roles": {},
+        "teams": {},
+        "time_off": [],
+        "seniors": [],
+        "weekends":[0,1,2,3],
+        "calls":["A", "B"],
+        }
 
 # ─── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -112,20 +132,22 @@ st.markdown('<div class="page-sub">Surgical Residency · Weekend Coverage · 4 W
 tab_input, tab1, tab2, tab3 = st.tabs(["INPUT","WEEKEND VIEW", "RESIDENT SUMMARY", "FULL TABLE"])
 # Manual Input/CSV Import
 with tab_input:
-    st.session_state['INPUT_DATA'] = {
-    "residents": [],
-    "roles": {},
-    "teams": {},
-    "time_off": [],
-    "seniors": [],
-    "weekends":[0,1,2,3],
-    "calls":["A", "B"],
-    }
-    st.text_input(label="Enter A Resident",
-                  placeholder="Mark", 
-                  key='resident_input')
-    st.button(label = "Add Resident", on_click=add_resident)
-    st.session_state['INPUT_DATA']
+    left, right = st.columns(2, gap="large")
+    with left:
+        with st.expander("Add Resident"):
+            st.text_input(label="Enter A Resident",
+                        placeholder="Mark", 
+                        key='resident_input')
+            st.selectbox(label='Level',
+                         options=['junior', 'mid', 'research', 'senior'], 
+                         key='role_input')
+            st.button(label = "Add Resident", on_click=add_resident)
+
+        
+
+        test = get_data()
+        test
+            
 # Give option to export manual import as CSV for later.
 
 #button not clicked yet
