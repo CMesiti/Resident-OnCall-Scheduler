@@ -88,7 +88,8 @@ def add_resident():
 
 def add_time_off():
     res = st.session_state['time_off_res']
-    w = st.session_state['time_off_w']
+    #map to our weekend indexes 0-4 (For Algorithm)
+    w = int(st.session_state['time_off_w'].split('-')[1]) - 1 
     get_data()['time_off'].append([res,w])
 
 def add_team():
@@ -100,8 +101,21 @@ def add_team():
 def assign_resident():
     team = st.session_state['assign_team']
     res = st.session_state['assign_res']
+    teams = get_data()['teams']
+    for t in teams:
+        if res in teams[t]:
+            teams[t].remove(res)
     get_data()['teams'][team].append(res)
     #remove res from any teams they are currently assigned.
+
+def remove_resident():
+    pass
+def remove_exception():
+    pass
+def remove_team_member():
+    pass
+def remove_team():
+    pass
 
 # ─── Session state ────────────────────────────────────────────────────────────
 if "schedule" not in st.session_state:
@@ -222,8 +236,26 @@ with tab_input:
             st.button(label="Assign Resident", on_click=assign_resident)
 
     with right:
+        r_col1, r_col2 = st.columns([5,1])
+        for res in d['residents']:
+            with r_col1:
+                st.write(res)
+            with r_col2:
+                st.button(label="X", key='x_res')
+        for time_off in d['time_off']:
+            with r_col1:
+                st.write(time_off)
+            with r_col2:
+                st.button(label="X", key='x_time')
+        for t in d['teams']:
+            with r_col1:
+                st.write(t)
+            with r_col2:
+                st.button(label="X", key='x_team')
+
+
         #display section, show resident pool, time off, teams and their members
-        pass
+        d
     st.markdown("---")
     if not st.session_state.schedule:
         st.markdown("""
