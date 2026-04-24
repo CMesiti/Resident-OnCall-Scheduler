@@ -49,6 +49,15 @@ def chip_html(r):
     cls = ROLE_CHIP.get(role,"chip-junior")
     return f'<span class="chip {cls}">{short(r)}</span>'
 
+def ready_load_html():
+    return """
+        <div style="text-align:center; padding:4rem 2rem; color:#7a746e;">
+        <div style="font-family:'Syne',sans-serif; font-size:3rem; font-weight:800; color:#cdc7ba; margin-bottom:0.5rem;">→</div>
+        <div style="font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:700; color:#1a1814; margin-bottom:0.4rem;">Ready to load schedule</div>
+        <div style="font-family:'Syne Mono',monospace; font-size:0.75rem; letter-spacing:0.08em;">Click ▶ Run cp_scheduler in the sidebar</div>
+        </div>
+        """
+
 def build_counts(schedule):
     """Count assignments per resident across all weekends and call types."""
     counts = defaultdict(lambda: {"A":0,"B":0,"rounding":0,"total":0})
@@ -70,11 +79,29 @@ def add_resident():
     res = st.session_state['resident_input'].strip()
     role = st.session_state['role_input']
     prefix_map = {'senior':'S', 'mid':'M', 'research':'R', 'junior':'J'}
-    full_res = prefix_map.get(role, 'J')+f"{res}"
-    get_data()['residents'].append(full_res)
-    get_data()['roles'][full_res] = role
-    if role=='senior':
-        get_data()['seniors'].append(full_res)
+    if res:
+        full_res = prefix_map.get(role, 'J')+f"-{res}"
+        get_data()['residents'].append(full_res)
+        get_data()['roles'][full_res] = role
+        if role=='senior':
+            get_data()['seniors'].append(full_res)
+
+def add_time_off():
+    res = st.session_state['time_off_res']
+    w = st.session_state['time_off_w']
+    get_data()['time_off'].append([res,w])
+
+def add_team():
+    team = st.session_state['team_input']
+    teams = get_data()['teams']
+    if team and team not in teams:
+        get_data()['teams'][team] = []
+
+def assign_resident():
+    team = st.session_state['assign_team']
+    res = st.session_state['assign_res']
+    get_data()['teams'][team].append(res)
+    #remove res from any teams they are currently assigned.
 
 # ─── Session state ────────────────────────────────────────────────────────────
 if "schedule" not in st.session_state:
@@ -123,7 +150,10 @@ with st.sidebar:
             key="role_filter",
         )
     else:
-        st.markdown('<div style="color:#8a8580;font-size:0.78rem;font-family:Syne Mono,monospace;margin-top:1rem;">Click ▶ Run to load the schedule.</div>', unsafe_allow_html=True)
+        st.markdown('<div style="color:#8a8580;font-size:0.78rem;\
+                    font-family:Syne Mono,monospace;margin-top:1rem;"\
+                    >Click ▶ Run to load the schedule.</div>', 
+                    unsafe_allow_html=True)
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
 
@@ -131,51 +161,97 @@ st.markdown('<div class="page-title">Call Schedule</div>', unsafe_allow_html=Tru
 st.markdown('<div class="page-sub">Surgical Residency · Weekend Coverage · 4 Weeks</div>', unsafe_allow_html=True)
 tab_input, tab1, tab2, tab3 = st.tabs(["INPUT","WEEKEND VIEW", "RESIDENT SUMMARY", "FULL TABLE"])
 # Manual Input/CSV Import
+
 with tab_input:
+    d = get_data()
+    header_html = '<div style="font-family:Syne Mono,monospace;\
+                    font-size:0.65rem;color:#7a746e;margin-bottom:0.3rem;'
     left, right = st.columns(2, gap="large")
     with left:
-        with st.expander("Add Resident"):
-            st.text_input(label="Enter A Resident",
+        #Header Style
+        st.markdown("##### Residents")
+        st.markdown(header_html, unsafe_allow_html=True)
+        #Add Residents to the pool
+        with st.expander("Add Resident", key='res_exp'):
+            st.text_input(label="Resident",
                         placeholder="Mark", 
                         key='resident_input')
             st.selectbox(label='Level',
                          options=['junior', 'mid', 'research', 'senior'], 
                          key='role_input')
             st.button(label = "Add Resident", on_click=add_resident)
+            #footnote
+            st.markdown('<div style="font-family:Syne Mono,monospace;\
+                        font-size:0.65rem;color:#7a746e;margin-top:0.3rem;"\
+                        >Prefix auto-generated if omitted (e.g. J7: Smith)</div>', 
+                        unsafe_allow_html=True)
 
-        
+        #Add time off for selected residents
+        st.markdown("##### Time Off")
+        st.markdown(header_html,unsafe_allow_html=True)
+        with st.expander("Add Exceptions"):
+            #select from resident pool
+            st.selectbox(label = "Select a Resident",
+                            options = d['residents'],
+                            key='time_off_res')
+            st.selectbox(label="Select a Weekend", 
+                            options = [f"Weekend-{w+1}" for w in d['weekends']],
+                            key='time_off_w')
+            st.button(label="Add Exception", on_click=add_time_off)
+            
+        #team additions, add team then assign residents.
+        #***not every resident must have a team.***
+        st.markdown("---")
+        st.markdown("##### Teams")
+        st.markdown(header_html, unsafe_allow_html=True)
+        with st.expander("Add Team"):
+            st.text_input(label="Team Name",
+                          placeholder="TeamA",
+                          key='team_input')
+            st.button(label='Add Team', on_click=add_team)
 
-        test = get_data()
-        test
+        st.markdown("##### Assign Residents")
+        st.markdown(header_html, unsafe_allow_html=True)
+        with st.expander("Assign Resident"):
+            st.selectbox(label='Team', 
+                        options=[team for team in d['teams'].keys()],
+                        key='assign_team')
+            st.selectbox(label='Resident', 
+                        options=d['residents'],
+                        key='assign_res')
+            st.button(label="Assign Resident", on_click=assign_resident)
+
+    with right:
+        #display section, show resident pool, time off, teams and their members
+        pass
+    st.markdown("---")
+    if not st.session_state.schedule:
+        st.markdown("""
+        <div style="text-align:center; padding:2rem 1rem; color:#7a746e;">
+          <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;
+                    color:#1a1814;margin-bottom:0.3rem;">Ready when you are</div>
+          <div style="font-family:'Syne Mono',monospace;font-size:0.72rem;
+                    letter-spacing:0.06em;">Click ▶ Run cp_scheduler in the sidebar to generate the schedule</div>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown('<div style="font-family:Syne Mono,monospace;\
+                    font-size:0.72rem;color:#1a5c2e;text-align:center;padding:1rem;"\
+                    >✓ Schedule generated — view results in the other tabs</div>',
+                      unsafe_allow_html=True)
+
             
 # Give option to export manual import as CSV for later.
 
 #button not clicked yet
 if not st.session_state.schedule:
+    ready_html = ready_load_html()
     with tab1:
-        st.markdown("""
-        <div style="text-align:center; padding:4rem 2rem; color:#7a746e;">
-        <div style="font-family:'Syne',sans-serif; font-size:3rem; font-weight:800; color:#cdc7ba; margin-bottom:0.5rem;">→</div>
-        <div style="font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:700; color:#1a1814; margin-bottom:0.4rem;">Ready to load schedule</div>
-        <div style="font-family:'Syne Mono',monospace; font-size:0.75rem; letter-spacing:0.08em;">Click ▶ Run cp_scheduler in the sidebar</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(ready_html, unsafe_allow_html=True)
     with tab2:
-        st.markdown("""
-        <div style="text-align:center; padding:4rem 2rem; color:#7a746e;">
-        <div style="font-family:'Syne',sans-serif; font-size:3rem; font-weight:800; color:#cdc7ba; margin-bottom:0.5rem;">→</div>
-        <div style="font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:700; color:#1a1814; margin-bottom:0.4rem;">Ready to load schedule</div>
-        <div style="font-family:'Syne Mono',monospace; font-size:0.75rem; letter-spacing:0.08em;">Click ▶ Run cp_scheduler in the sidebar</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(ready_html, unsafe_allow_html=True)
     with tab3:
-        st.markdown("""
-        <div style="text-align:center; padding:4rem 2rem; color:#7a746e;">
-        <div style="font-family:'Syne',sans-serif; font-size:3rem; font-weight:800; color:#cdc7ba; margin-bottom:0.5rem;">→</div>
-        <div style="font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:700; color:#1a1814; margin-bottom:0.4rem;">Ready to load schedule</div>
-        <div style="font-family:'Syne Mono',monospace; font-size:0.75rem; letter-spacing:0.08em;">Click ▶ Run cp_scheduler in the sidebar</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(ready_html, unsafe_allow_html=True)
     st.stop()
 
 sched = st.session_state.schedule
