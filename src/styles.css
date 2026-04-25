@@ -91,20 +91,22 @@ h1,h2,h3,h4,h5 {
 
 /* Buttons */
 .stButton > button {
-  background: var(--ink) !important;
-  color: var(--bg) !important;
-  border: 1px solid var(--border) !important;
+  background: transparent !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--ink) !important;
   border-radius: 4px !important;
-  font-family: 'Syne Mono', monospace !important;
-  font-size: 0.75rem !important;
+  padding: 2px 8px !important;
+  font-size: 0.7rem !important;
+  min-height: unset !important;
   letter-spacing: 0.06em;
-  padding: 0.5rem 1.3rem !important;
   transition: all 0.15s ease !important;
 }
 .stButton > button:hover {
-  background: #2a2822 !important;
+  
+  background:#2a2822 !important;
   transform: translateY(-1px) !important;
 }
+
 
 /* DataFrames */
 [data-testid="stDataFrame"] {

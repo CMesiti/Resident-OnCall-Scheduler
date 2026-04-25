@@ -236,26 +236,74 @@ with tab_input:
             st.button(label="Assign Resident", on_click=assign_resident)
 
     with right:
-        r_col1, r_col2 = st.columns([5,1])
-        for res in d['residents']:
-            with r_col1:
-                st.write(res)
-            with r_col2:
-                st.button(label="X", key='x_res')
-        for time_off in d['time_off']:
-            with r_col1:
-                st.write(time_off)
-            with r_col2:
-                st.button(label="X", key='x_time')
-        for t in d['teams']:
-            with r_col1:
-                st.write(t)
-            with r_col2:
-                st.button(label="X", key='x_team')
+        st.markdown("##### Resident Pool")
+        st.markdown(f'<div style="font-family:Syne Mono,monospace;font-size:0.65rem;color:#7a746e;margin-bottom:0.8rem;"></div>', unsafe_allow_html=True)
+        if d["residents"]:
+                    role_order = {"senior":0,"research":1,"mid":2,"junior":3}
+                    role_accent = {"senior":"#1a3a5c","mid":"#5c3a1a","junior":"#3a1a5c","research":"#1a5c2e"}
+                    sorted_res = sorted(d["residents"], key=lambda r: (role_order.get(d["roles"].get(r,"junior"),2), r))
+                    for r in sorted_res:
+                        role = d["roles"].get(r,"")
+                        chip_cls = ROLE_CHIP.get(role,"chip-junior")
+                        color = role_accent.get(role,"#3a1a5c")
+                        team = team_of(r)
+                        card_col, btn_col = st.columns([2,1])
+                        with card_col:
+                            st.markdown(
+                                f'<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid {color};'
+                                f'border-radius:6px;padding:0.5rem 0.9rem;margin-bottom:0.3rem;display:flex;align-items:center;gap:8px;">'
+                                f'<span class="chip {chip_cls}" style="font-size:0.65rem;">{role}</span>'
+                                f'<span style="font-family:Syne,sans-serif;font-weight:700;font-size:0.85rem;color:#1a1814">{short(r)}</span>'
+                                f'<span style="font-family:Syne Mono,monospace;font-size:0.65rem;color:#1a1814;margin-right:auto;">{team}</span>'
+                                f'</div>',
+                                unsafe_allow_html=True,
+                            )
+                        with btn_col:
+                            st.button("✕", key=f"del_res_{r}", on_click=remove_resident, args=(r,))
+        
+        st.markdown("---")
+        st.markdown("##### Time Off")
+        st.markdown(f'<div style="font-family:Syne Mono,monospace;font-size:0.65rem;color:#7a746e;margin-bottom:0.8rem;"></div>', unsafe_allow_html=True)
+
+        # Time-off list — card style matching teams
+        if d["time_off"]:
+            for i, req in enumerate(d["time_off"]):
+                res_role = d["roles"].get(req[0],"junior")
+                color = role_accent.get(res_role,"#3a1a5c")
+                card_col, btn_col = st.columns([2,1])
+                with card_col:
+                    st.markdown(
+                        f'<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid {color};'
+                        f'border-radius:6px;padding:0.5rem 0.9rem;margin-bottom:0.3rem;display:flex;align-items:center;gap:8px;">'
+                        f'<span style="font-family:Syne,sans-serif;font-weight:700;font-size:0.85rem; color:#1a1814">{short(req[0])}</span>'
+                        f'<span style="font-family:Syne Mono,monospace;font-size:0.65rem;color:#7a746e;margin-left:auto;">Weekend {req[1]+1}</span>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+                with btn_col:
+                    st.button("✕", key=f"del_to_{i}", on_click=remove_exception, args=(i,))
+
+        st.markdown("---")
+        st.markdown("##### Teams")
+        st.markdown(f'<div style="font-family:Syne Mono,monospace;font-size:0.65rem;color:#7a746e;margin-bottom:0.8rem;"></div>', unsafe_allow_html=True)
+        # Team cards
+        TEAM_COLORS_LIST = ["#1a3a5c","#8b2e0a","#1a5c2e","#5c3a1a","#3a1a5c","#5c1a3a","#1a4a5c","#4a5c1a","#5c4a1a","#1a5c4a"]
+        for ti, (team_name, members) in enumerate(d["teams"].items()):
+            color = TEAM_COLORS_LIST[ti % len(TEAM_COLORS_LIST)]
+            chips_html = "".join(chip_html(r) for r in members) if members else '<span style="font-family:Syne Mono,monospace;font-size:0.68rem;color:#7a746e;">No members</span>'
+            st.markdown(f"""
+            <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid {color};
+                 border-radius:6px;padding:0.7rem 0.9rem;margin-bottom:0.5rem;">
+              <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;margin-bottom:0.4rem;color:#1a1814">{team_name}
+                <span style="font-family:'Syne Mono',monospace;font-weight:400;font-size:0.65rem;color:#7a746e;margin-left:6px;">{len(members)} members</span>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:3px;">{chips_html}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
 
         #display section, show resident pool, time off, teams and their members
-        d
+        
     st.markdown("---")
     if not st.session_state.schedule:
         st.markdown("""
