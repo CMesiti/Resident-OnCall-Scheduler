@@ -18,7 +18,7 @@ load_css("styles.css")
 
 # ─── Input Data ───────────────────────────────────────────────────────────────
 
-INPUT_DATA = {
+DEFAULT_DATA = {
     "residents": ["S1: Mesiti","S2: Applegarth","S4: Nageeb","S5: LeMarbe","S6: Sobolic","S7: Baida","S8: Waleizer","S9: Haj Assad","S10: Robbe","S11: Aung","S12: Teitlebaum","M13: Dowding","M14: Hurst","M15: Kowalczyk","M17: Najor","M18: Butler","M19: Davis","J21: Hunyadi","J22: Getzinger","J23: Faraj","J27: Gibbons","J28: Sancraint","J30: Sturtevant","J32: Vadnala","J33: Wolf","J34: Morrison","J35: Rotator 1","J36: Rotator 2","J37: Rotator 3","J38: Rotator 4"],
     "roles": {"S1: Mesiti":"senior","S2: Applegarth":"senior","S4: Nageeb":"senior","S5: LeMarbe":"senior","S6: Sobolic":"senior","S7: Baida":"senior","S8: Waleizer":"senior","S9: Haj Assad":"senior","S10: Robbe":"senior","S11: Aung":"senior","S12: Teitlebaum":"senior","M13: Dowding":"mid","M14: Hurst":"research","M15: Kowalczyk":"mid","M17: Najor":"mid","M18: Butler":"mid","M19: Davis":"research","J21: Hunyadi":"junior","J22: Getzinger":"junior","J23: Faraj":"junior","J27: Gibbons":"junior","J28: Sancraint":"junior","J30: Sturtevant":"junior","J32: Vadnala":"junior","J33: Wolf":"junior","J34: Morrison":"junior","J35: Rotator 1":"junior","J36: Rotator 2":"junior","J37: Rotator 3":"junior","J38: Rotator 4":"junior"},
     "teams": {"Red":["S4: Nageeb","J22: Getzinger","J32: Vadnala"],"Aqua":["M17: Najor","M18: Butler"],"Vascular":["S10: Robbe","J37: Rotator 3"],"Yellow":["S5: LeMarbe","J34: Morrison"],"Orange":["S7: Baida","J23: Faraj"],"Pink":["S1: Mesiti","J27: Gibbons"],"Gold":["S8: Waleizer","M15: Kowalczyk","J35: Rotator 1"],"Thoracic":["S2: Applegarth","J28: Sancraint","J36: Rotator 2"],"Purple":["S9: Haj Assad","J21: Hunyadi"],"Peds":["M13: Dowding","J30: Sturtevant"]},
@@ -36,10 +36,10 @@ def short(r):
     return r.split(": ",1)[1] if ": " in r else r
 
 def role_of(r):
-    return INPUT_DATA["roles"].get(r,"")
+    return get_data()["roles"].get(r,"")
 
 def team_of(r):
-    for t, members in INPUT_DATA["teams"].items():
+    for t, members in get_data()["teams"].items():
         if r in members:
             return t
     return "—"
@@ -69,7 +69,7 @@ def build_counts(schedule):
     return counts
 
 def build_time_off_set():
-    return {(r, wk) for r, wk in INPUT_DATA["time_off"]}
+    return {(r, wk) for r, wk in get_data()["time_off"]}
 
 def get_data():
     return st.session_state['input_data']
@@ -78,10 +78,11 @@ def get_data():
 def add_resident():
     res = st.session_state['resident_input'].strip()
     role = st.session_state['role_input']
+    res_ls = get_data()['residents']
     prefix_map = {'senior':'S', 'mid':'M', 'research':'R', 'junior':'J'}
-    if res:
-        full_res = prefix_map.get(role, 'J')+f"-{res}"
-        get_data()['residents'].append(full_res)
+    full_res = prefix_map.get(role, 'J')+f"-{res}"
+    if res and full_res not in res_ls:
+        res_ls.append(full_res)
         get_data()['roles'][full_res] = role
         if role=='senior':
             get_data()['seniors'].append(full_res)
@@ -108,13 +109,19 @@ def assign_resident():
     get_data()['teams'][team].append(res)
     #remove res from any teams they are currently assigned.
 
-def remove_resident():
-    pass
-def remove_exception():
-    pass
-def remove_team_member():
-    pass
-def remove_team():
+def remove_resident(r):
+    res_ls = get_data()['residents']
+    res_ls.remove(r)
+    #remove this use from any teams.
+    teams = get_data()['teams']
+    for t in teams:
+        teams[t].remove(r)
+
+def remove_exception(i):
+    time_off_ls = get_data()['time_off']
+    time_off_ls.pop(i)
+
+def remove_team(t):
     pass
 
 # ─── Session state ────────────────────────────────────────────────────────────
@@ -137,8 +144,8 @@ with st.sidebar:
     st.markdown("---")
     if st.button("▶  Run cp_scheduler"):
         with st.spinner("Running scheduler…"):
-            INPUT_DATA['time_off'] = build_time_off_set()
-            st.session_state.schedule = cp_resident_scheduler(**INPUT_DATA)
+            get_data()['time_off'] = build_time_off_set()
+            st.session_state.schedule = cp_resident_scheduler(**get_data())
 
     if st.session_state.schedule:
         st.markdown("---")
@@ -239,27 +246,27 @@ with tab_input:
         st.markdown("##### Resident Pool")
         st.markdown(f'<div style="font-family:Syne Mono,monospace;font-size:0.65rem;color:#7a746e;margin-bottom:0.8rem;"></div>', unsafe_allow_html=True)
         if d["residents"]:
-                    role_order = {"senior":0,"research":1,"mid":2,"junior":3}
-                    role_accent = {"senior":"#1a3a5c","mid":"#5c3a1a","junior":"#3a1a5c","research":"#1a5c2e"}
-                    sorted_res = sorted(d["residents"], key=lambda r: (role_order.get(d["roles"].get(r,"junior"),2), r))
-                    for r in sorted_res:
-                        role = d["roles"].get(r,"")
-                        chip_cls = ROLE_CHIP.get(role,"chip-junior")
-                        color = role_accent.get(role,"#3a1a5c")
-                        team = team_of(r)
-                        card_col, btn_col = st.columns([2,1])
-                        with card_col:
-                            st.markdown(
-                                f'<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid {color};'
-                                f'border-radius:6px;padding:0.5rem 0.9rem;margin-bottom:0.3rem;display:flex;align-items:center;gap:8px;">'
-                                f'<span class="chip {chip_cls}" style="font-size:0.65rem;">{role}</span>'
-                                f'<span style="font-family:Syne,sans-serif;font-weight:700;font-size:0.85rem;color:#1a1814">{short(r)}</span>'
-                                f'<span style="font-family:Syne Mono,monospace;font-size:0.65rem;color:#1a1814;margin-right:auto;">{team}</span>'
-                                f'</div>',
-                                unsafe_allow_html=True,
-                            )
-                        with btn_col:
-                            st.button("✕", key=f"del_res_{r}", on_click=remove_resident, args=(r,))
+            role_order = {"senior":0,"research":1,"mid":2,"junior":3}
+            role_accent = {"senior":"#1a3a5c","mid":"#5c3a1a","junior":"#3a1a5c","research":"#1a5c2e"}
+            sorted_res = sorted(d["residents"], key=lambda r: (role_order.get(d["roles"].get(r,"junior"),2), r))
+            for r in sorted_res:
+                role = d["roles"].get(r,"")
+                chip_cls = ROLE_CHIP.get(role,"chip-junior")
+                color = role_accent.get(role,"#3a1a5c")
+                team = team_of(r)
+                card_col, btn_col = st.columns([2,1])
+                with card_col:
+                    st.markdown(
+                        f'<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid {color};'
+                        f'border-radius:6px;padding:0.5rem 0.9rem;margin-bottom:0.3rem;display:flex;align-items:center;gap:8px;">'
+                        f'<span class="chip {chip_cls}" style="font-size:0.65rem;">{role}</span>'
+                        f'<span style="font-family:Syne,sans-serif;font-weight:700;font-size:0.85rem;color:#1a1814">{short(r)}</span>'
+                        f'<span style="font-family:Syne Mono,monospace;font-size:0.65rem;color:#1a1814;margin-right:auto;">{team}</span>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+                with btn_col:
+                    st.button("✕", key=f"del_res_{r}", on_click=remove_resident, args=(r,))
         
         st.markdown("---")
         st.markdown("##### Time Off")
@@ -301,8 +308,6 @@ with tab_input:
             </div>
             """, unsafe_allow_html=True)
 
-
-        #display section, show resident pool, time off, teams and their members
         
     st.markdown("---")
     if not st.session_state.schedule:
@@ -396,12 +401,12 @@ with tab2:
 
     # Build rows filtered by role
     rows_data = []
-    for r in INPUT_DATA["residents"]:
+    for r in get_data()["residents"]:
         role = role_of(r)
         if role not in role_filter:
             continue
         c = counts.get(r, {"A":0,"B":0,"rounding":0,"total":0})
-        to_wks = [str(wk+1) for res, wk in INPUT_DATA["time_off"] if res == r]
+        to_wks = [str(wk+1) for res, wk in get_data()["time_off"] if res == r]
         rows_data.append({
             "resident": r,
             "name": short(r),
@@ -494,7 +499,7 @@ with tab3:
     st.markdown("##### Call Count Summary")
 
     summary_rows = []
-    for r in INPUT_DATA["residents"]:
+    for r in get_data()["residents"]:
         role = role_of(r)
         if role not in role_filter:
             continue
