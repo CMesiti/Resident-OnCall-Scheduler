@@ -108,14 +108,15 @@ def cp_resident_scheduler(residents, teams, weekends, calls, time_off, roles, se
   # solver.parameters.enumerate_all_solutions = True
   solver.parameters.max_time_in_seconds = 45
   result = solver.Solve(model)
+  feedback = None
   if result == cp_model.FEASIBLE:
-    print("Found a solution")
+    feedback = "Found a solution"
   elif result == cp_model.OPTIMAL:
-    print("Optimal solution")
+    feedback = "Optimal solution"
   elif result == cp_model.INFEASIBLE:
-    print("No solution exists")
+    feedback = "No solution exists"
   else:
-    print("Unknown (might exist, not found yet)")
+    feedback = ("Unknown (might exist, not found yet)")
 
   schedule = {}
   if result == cp_model.OPTIMAL or result == cp_model.FEASIBLE:
@@ -137,13 +138,5 @@ def cp_resident_scheduler(residents, teams, weekends, calls, time_off, roles, se
           "rounding":[rounding]},
       "2":{...}
       }"""
-  return schedule
+  return schedule, feedback
 
-
-# schedule = cp_resident_scheduler(residents=residents,
-#                                        teams=teams,
-#                                        weekends=weekends, 
-#                                        calls=calls, 
-#                                        time_off=time_off, 
-#                                        roles=roles,
-#                                        seniors=seniors)

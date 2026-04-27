@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 from collections import defaultdict
 from scheduler.cp_scheduler import cp_resident_scheduler
+import json
+import copy
 # ─── Page Config ─────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Call Schedule",
@@ -86,18 +88,21 @@ def add_resident():
         get_data()['roles'][full_res] = role
         if role=='senior':
             get_data()['seniors'].append(full_res)
+    st.session_state['schedule'] = None
 
 def add_time_off():
     res = st.session_state['time_off_res']
     #map to our weekend indexes 0-4 (For Algorithm)
     w = int(st.session_state['time_off_w'].split('-')[1]) - 1 
     get_data()['time_off'].append([res,w])
+    st.session_state['schedule'] = None
 
 def add_team():
     team = st.session_state['team_input']
     teams = get_data()['teams']
     if team and team not in teams:
         get_data()['teams'][team] = []
+    st.session_state['schedule'] = None
 
 def assign_resident():
     team = st.session_state['assign_team']
@@ -108,6 +113,7 @@ def assign_resident():
             teams[t].remove(res)
     get_data()['teams'][team].append(res)
     #remove res from any teams they are currently assigned.
+    st.session_state['schedule'] = None
 
 def remove_resident(r):
     res_ls = get_data()['residents']
@@ -116,13 +122,34 @@ def remove_resident(r):
     teams = get_data()['teams']
     for t in teams:
         teams[t].remove(r)
+    st.session_state['schedule'] = None
 
 def remove_exception(i):
     time_off_ls = get_data()['time_off']
     time_off_ls.pop(i)
+    st.session_state['schedule'] = None
 
 def remove_team(t):
     pass
+
+def serialize_json():
+    try:
+        json_data = copy.deepcopy(get_data())
+        json_data['time_off'] = [x for x in json_data['time_off']]
+        json_data = json.dumps(json_data)
+    except Exception as e:
+        print('Input Error: ', e)
+    return json_data
+
+def on_upload():
+    json_data = st.session_state['upload_data']
+    if json_data:
+        try:
+            st.session_state['input_data'] = json.loads(json_data.getvalue())
+            st.session_state['schedule'] = None
+        except Exception as e:
+            print('Upload_Error: ', e)
+    
 
 # ─── Session state ────────────────────────────────────────────────────────────
 if "schedule" not in st.session_state:
@@ -144,8 +171,11 @@ with st.sidebar:
     st.markdown("---")
     if st.button("▶  Run cp_scheduler"):
         with st.spinner("Running scheduler…"):
-            get_data()['time_off'] = build_time_off_set()
-            st.session_state.schedule = cp_resident_scheduler(**get_data())
+            sched_copy = copy.deepcopy(get_data())
+            sched_copy['time_off'] = build_time_off_set()
+            st.session_state.schedule, feedback = cp_resident_scheduler(**sched_copy)
+            st.write(feedback)
+
 
     if st.session_state.schedule:
         st.markdown("---")
@@ -308,7 +338,17 @@ with tab_input:
             </div>
             """, unsafe_allow_html=True)
 
-        
+
+    st.markdown("---")
+    if get_data()['residents']:
+        st.download_button("Download Input Data", 
+                        key='download_data',
+                        data=serialize_json(), 
+                        file_name='input_data.json')
+    json_upload = st.file_uploader("Upload Your input_data.json",
+                                   type='json',
+                                   key='upload_data',
+                                   on_change=on_upload)
     st.markdown("---")
     if not st.session_state.schedule:
         st.markdown("""
