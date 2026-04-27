@@ -5,4 +5,4 @@
 -  This is meant to be a baseline to fullfill all the requirements and constraints set by the user. Further analysis is required and changes may be needed to get the perfect schedule.
 
 
-# Check out the App! [On-Call Scheduler]("https://resident-oncall-scheduler-rp2knjwefdtn798p2xxaf4.streamlit.app/")
+# Check out the App! [On-Call Scheduler](https://resident-oncall-scheduler-rp2knjwefdtn798p2xxaf4.streamlit.app/)
