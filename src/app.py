@@ -4,6 +4,7 @@ from collections import defaultdict
 from scheduler.cp_scheduler import cp_resident_scheduler
 import json
 import copy
+import os
 # ─── Page Config ─────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Call Schedule",
@@ -14,7 +15,10 @@ st.set_page_config(
 
 # ─── CSS ─────────────────────────────────────────────────────────────────────
 def load_css(path):
-    with open(path) as f:
+    base_dir = os.path.dirname(__file__)  # directory of app.py
+    css_path = os.path.join(base_dir, path)
+
+    with open(css_path) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 load_css("styles.css")
 
