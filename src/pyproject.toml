@@ -1,9 +1,10 @@
 [project]
-name = "src"
+name = "Resident-Scheduler"
 version = "0.1.0"
-description = "Add your description here"
+description = "Scheduling Algorithm and Simple UI for Chief resident scheduling On Call teams"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "ortools>=9.15.6755",
+    "streamlit>=1.56.0",
 ]

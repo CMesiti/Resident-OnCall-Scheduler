@@ -18,7 +18,7 @@ def cp_resident_scheduler(residents, teams, weekends, calls, time_off, roles, se
   for w in weekends:
     for c in calls:
       senior_count = sum(x[(r,w,c)] for r in residents if roles[r]=='senior') #how many seniors on call
-      mid_count = sum(x[(r,w,c)] for r in residents if roles[r]=='mid')
+      mid_count = sum(x[(r,w,c)] for r in residents if roles[r]=='mid' or roles[r]=='research')
       junior_count = sum(x[(r,w,c)] for r in residents if roles[r]=='junior')
       total_count = sum(x[(r,w,c)] for r in residents) # how many residents in total
 
@@ -104,31 +104,33 @@ def cp_resident_scheduler(residents, teams, weekends, calls, time_off, roles, se
   # -----------------------------
   solver = cp_model.CpSolver()
   solver.parameters.linearization_level = 0
-  # Enumerate all solutions.
+  # Enumerate all solutions. Set as Bool flag, if no optimal enumerate all.
   # solver.parameters.enumerate_all_solutions = True
   solver.parameters.max_time_in_seconds = 45
   result = solver.Solve(model)
+  feedback = None
   if result == cp_model.FEASIBLE:
-    print("Found a solution")
+    feedback = "Found a solution"
   elif result == cp_model.OPTIMAL:
-    print("Optimal solution")
+    feedback = "Optimal solution"
   elif result == cp_model.INFEASIBLE:
-    print("No solution exists")
+    feedback = "No solution exists"
   else:
-    print("Unknown (might exist, not found yet)")
+    feedback = ("Unknown (might exist, not found yet)")
 
   schedule = {}
   if result == cp_model.OPTIMAL or result == cp_model.FEASIBLE:
     for w in weekends:
-      print(f"\nWeekend {w+1}")
-      schedule[w+1] = {}
+      # print(f"\nWeekend {w+1}")
+      weekend = f"weekend{w+1}"
+      schedule[weekend] = {}
       for c in calls:
         assigned = [r for r in residents if solver.Value(x[(r,w,c)]) == 1]
-        schedule[w+1][c] = assigned
-        print(f"  Call {c}: {assigned}")
+        schedule[weekend][c] = assigned
+        # print(f"  Call {c}: {assigned}")
       rounding = [s for s in seniors if solver.Value(y[(s,w)]) == 1]
-      schedule[w+1]['rounding'] = rounding
-      print(f"Rounding: {rounding}")
+      schedule[weekend]['rounding'] = rounding
+      # print(f"Rounding: {rounding}")
 
   """{"1":{
           "callA":[assigned],
@@ -136,13 +138,5 @@ def cp_resident_scheduler(residents, teams, weekends, calls, time_off, roles, se
           "rounding":[rounding]},
       "2":{...}
       }"""
-  return schedule
+  return schedule, feedback
 
-
-# schedule = cp_resident_scheduler(residents=residents,
-#                                        teams=teams,
-#                                        weekends=weekends, 
-#                                        calls=calls, 
-#                                        time_off=time_off, 
-#                                        roles=roles,
-#                                        seniors=seniors)
