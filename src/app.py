@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from collections import defaultdict
-from scheduler.cp_scheduler import cp_resident_scheduler
+from src.scheduler.constraint_scheduler import cp_resident_scheduler
 import json
 import copy
 import os
@@ -60,7 +60,7 @@ def ready_load_html():
         <div style="text-align:center; padding:4rem 2rem; color:#7a746e;">
         <div style="font-family:'Syne',sans-serif; font-size:3rem; font-weight:800; color:#cdc7ba; margin-bottom:0.5rem;">→</div>
         <div style="font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:700; color:#1a1814; margin-bottom:0.4rem;">Ready to load schedule</div>
-        <div style="font-family:'Syne Mono',monospace; font-size:0.75rem; letter-spacing:0.08em;">Click ▶ Run cp_scheduler in the sidebar</div>
+        <div style="font-family:'Syne Mono',monospace; font-size:0.75rem; letter-spacing:0.08em;">Click ▶ Run constraint_scheduler in the sidebar</div>
         </div>
         """
 
@@ -174,7 +174,7 @@ if 'input_data' not in st.session_state:
 with st.sidebar:
     st.markdown("### 🔵 Call Schedule")
     st.markdown("---")
-    if st.button("▶  Run cp_scheduler"):
+    if st.button("▶  Run constraint_scheduler"):
         with st.spinner("Running scheduler…"):
             sched_copy = copy.deepcopy(get_data())
             sched_copy['time_off'] = build_time_off_set()
@@ -361,7 +361,7 @@ with tab_input:
           <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;
                     color:#1a1814;margin-bottom:0.3rem;">Ready when you are</div>
           <div style="font-family:'Syne Mono',monospace;font-size:0.72rem;
-                    letter-spacing:0.06em;">Click ▶ Run cp_scheduler in the sidebar to generate the schedule</div>
+                    letter-spacing:0.06em;">Click ▶ Run constraint_scheduler in the sidebar to generate the schedule</div>
         </div>
         """, unsafe_allow_html=True)
     else:
