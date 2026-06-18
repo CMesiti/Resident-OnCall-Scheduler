@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from collections import defaultdict
-from src.scheduler.constraint_scheduler import cp_resident_scheduler
+from scheduler.constraint_scheduler import cp_resident_scheduler
 import json
 import copy
 import os
