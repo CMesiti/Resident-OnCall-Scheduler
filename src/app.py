@@ -125,7 +125,8 @@ def remove_resident(r):
     #remove this use from any teams.
     teams = get_data()['teams']
     for t in teams:
-        teams[t].remove(r)
+        if r in t:
+            teams[t].remove(r)
     st.session_state['schedule'] = None
 
 def remove_exception(i):
