@@ -1,10 +1,10 @@
-import type {Role} from "../App.tsx"
-import type {Resident} from "../views/input.tsx"
+import type {Role, Resident} from "../App.tsx"
 import {useState} from "react"
 import "./forms.css"
 interface ResidentFormProps{
     onResidentSubmit: (res:Resident) => void;
 };
+//Controlled component
 const ResidentForm = ({onResidentSubmit}:ResidentFormProps) => {
     //variables to handle inputs
     let [resName, setResName] = useState<string>("")
