@@ -1,24 +1,25 @@
-import {useState} from "react"
+import "./navbar.css"
 
 interface NavProps {
     onViewChange: (view: string) => void
+    currentView:string
 }
-const TopNavBar = ({onViewChange}:NavProps) =>{
+const TopNavBar = ({onViewChange, currentView}:NavProps) =>{
     return (
     <div className="top-nav">
-        <button onClick={() => onViewChange("input")}>
+        <button className={currentView === "input" ? "active" : ""} onClick={() => onViewChange("input")}>
         Input
         </button>
 
-        <button onClick={() => onViewChange("schedule")}>
+        <button className={currentView === "schedule" ? "active" : ""} onClick={() => onViewChange("schedule")}>
         Schedule
         </button>
 
-        <button onClick={() => onViewChange("summary")}>
+        <button className={currentView === "summary" ? "active" : ""} onClick={() => onViewChange("summary")}>
         Summary
         </button>
 
-        <button onClick={() => onViewChange("tables")}>
+        <button className={currentView === "tables" ? "active" : ""} onClick={() => onViewChange("tables")}>
         Tables
         </button>
     </div>)

@@ -1,0 +1,18 @@
+/* =============================================
+   INPUT VIEW LAYOUT
+   ============================================= */
+.input-container {
+  max-width: 760px;
+}
+ 
+.form-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+ 
+@media (max-width: 640px) {
+  .form-container { grid-template-columns: 1fr; }
+}
+ 
+ 
