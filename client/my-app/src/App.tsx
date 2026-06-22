@@ -7,7 +7,7 @@ import { SummaryView } from './views/residentSummary.tsx';
 import { ScheduleView } from './views/schedule.tsx';
 
 
-type Role = 'senior'|'mid'|'junior';
+export type Role = 'senior'|'mid'|'junior';
 
 interface Resident{
   name:string;
