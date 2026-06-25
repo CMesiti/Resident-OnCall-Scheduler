@@ -10,7 +10,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 1.25rem;
 }
- 
+
 @media (max-width: 640px) {
   .form-container { grid-template-columns: 1fr; }
 }

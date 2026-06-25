@@ -1,8 +1,8 @@
 import {useState} from "react"
 import "./forms.css"
-
+import type { Team } from "../App";
 interface TeamFormProps{
-    onTeamSubmit: (name:string) => void;
+    onTeamSubmit: (team:Team) => void;
 };
 
 const TeamForm = ({onTeamSubmit}:TeamFormProps) => {
@@ -13,7 +13,7 @@ const TeamForm = ({onTeamSubmit}:TeamFormProps) => {
     function handleSubmit(e:React.SubmitEvent<HTMLFormElement>){
         e.preventDefault();
         console.log(teamName)
-        onTeamSubmit(teamName)
+        onTeamSubmit({name:teamName, residents:[]})
         setTeamName("")
     }
     return (    
