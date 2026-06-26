@@ -19,6 +19,14 @@
     - Instead of passing the set function directly down, we reference this as an interface defining component props or a custom props type for the component.
     - When this is used to pass through many layers we can have context drilling.
 
+- State
+    - state can only be passed to child components through props
+    - state should only contain the data that component needs it should only be updated by the owning component.
+    - Lifting state up
+        - create a parent component to share data to siblings.
+        - in our example App is a central parent component that we can share state objects to child components and siblings.
+        - state management libraries are useful when we have deep components.
+
 
 - Mapping
     - 

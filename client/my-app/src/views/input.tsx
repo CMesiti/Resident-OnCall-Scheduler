@@ -9,6 +9,7 @@ import "./input.css"
 interface InputViewProps{
     onAddResident: (res:Resident) => void
     onRemResident: (res:Resident) => void
+    onAddTeamMember:(teamName:string, res:Resident) => void
     onAddTeam:(team:Team) => void
     onRemTeam:(team:Team) => void
     resident_ls:Resident[]
@@ -18,7 +19,7 @@ interface InputViewProps{
 
 
 
-export function InputView({resident_ls, team_ls, timeOff_ls, onAddResident, onAddTeam, onRemResident, onRemTeam}:InputViewProps){
+export function InputView({resident_ls, team_ls, timeOff_ls, onAddResident, onAddTeam, onRemResident, onRemTeam, onAddTeamMember}:InputViewProps){
     return (
     <div className="input-container">
         <section className="form-container">
@@ -26,12 +27,21 @@ export function InputView({resident_ls, team_ls, timeOff_ls, onAddResident, onAd
             <TeamForm onTeamSubmit={onAddTeam}/>
             <div className="pool-container">
                 <div id='resident-pool'>
-                    <ResidentChip resident_ls={resident_ls} onRemResident={onRemResident}/>
+                    <ResidentChip 
+                    team_ls={team_ls} 
+                    resident_ls={resident_ls} 
+                    onRemResident={onRemResident} 
+                    onAddTeamMember={onAddTeamMember}/>
                 </div>
             </div>
             <div className="pool-container">
                 <div id="team-pool">
-                    <TeamCard onRemTeam={onRemTeam} team_ls={team_ls} onRemResident={onRemResident}/>
+                    <TeamCard 
+                    onAddTeamMember={onAddTeamMember}
+                    onRemTeam={onRemTeam} 
+                    team_ls={team_ls} 
+                    resident_ls={resident_ls}
+                    onRemResident={onRemResident}/>
                 </div>
             </div>
         </section>

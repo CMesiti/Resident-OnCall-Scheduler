@@ -19,6 +19,8 @@
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
   transition: box-shadow 0.15s;
+  min-width: 0;
+  overflow: hidden;
 }
  
 .chip:hover {
@@ -50,6 +52,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
 }
  
 /* Remove button */
@@ -103,3 +106,40 @@
   text-transform: uppercase;
   color: var(--slate-600);
 }
+ 
+/* ── Inline team select inside chip ── */
+.chip-team-select {
+  flex-shrink: 1;
+  min-width: 0;
+  max-width: 110px;
+  width: 110px;
+  height: 26px;
+  padding: 0 22px 0 8px;
+  border: 0.5px solid var(--slate-200);
+  border-radius: var(--radius-sm);
+  background: var(--slate-50);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%235F6170' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  font-size: 12px;
+  font-family: var(--font-base);
+  color: var(--slate-800);
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+ 
+.chip-team-select:focus {
+  border-color: var(--teal-200);
+  background-color: #fff;
+  box-shadow: var(--shadow-focus);
+}
+ 
+.chip-team-select option[value=""] {
+  color: var(--slate-600);
+}
+ 

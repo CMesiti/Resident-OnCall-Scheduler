@@ -10,6 +10,7 @@ import './App.css'
 export interface Resident{
   name:string;
   role:Role;
+  teamName?:string
 }
 export interface TimeOff{
   resident:string;
@@ -18,7 +19,6 @@ export interface TimeOff{
 
 export interface Team{
   name:string;
-  residents:Resident[]
 }
 export type Role = 'senior'|'research'|'mid'|'junior';
 function App() {
@@ -44,8 +44,8 @@ function App() {
     setTeams(prev =>(prev.some(t=>t.name===team.name)? prev.filter(t => t.name!==team.name):prev))
   }
 
-  const add_Team_Resident = (team:Team, res:Resident) => {
-
+  const add_Team_Resident = (teamName:string, res:Resident) => {
+    setResidents(prev => prev.map(r => r.name===res.name && r.role===res.role ? {...r, teamName:teamName} : r))
   }
   // will be assigned through team form entering team name
 
@@ -54,8 +54,6 @@ function App() {
   //     // complex logic, attribute of resident for a specific week list[[res, week#]]
   //     setTimeOff(prev => [...prev, timeOff]);
   // }
-
-
   //<function>, <dependency> runs on residents change
   useEffect(() =>{
         console.log("Residents :", residents)
@@ -81,6 +79,7 @@ function App() {
       resident_ls={residents} 
       onAddResident={add_Resident}
       onRemResident={rem_Resident}
+      onAddTeamMember={add_Team_Resident}
       onAddTeam={add_Team}
       onRemTeam={rem_Team} />} 
       {activeView === "schedule" && <ScheduleView />}
