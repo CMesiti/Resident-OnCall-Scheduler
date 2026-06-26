@@ -1,3 +1,49 @@
-export function InputView(){
-    return <div></div>
+import {ResidentForm} from "../components/residentForm.tsx"
+import { TeamForm } from "../components/teamForm.tsx";
+import { ResidentChip } from "../components/residentChip.tsx";
+import { TeamCard } from "../components/teamCard.tsx";
+import type {Resident, TimeOff, Team} from "../App.tsx"
+
+import "./input.css"
+
+interface InputViewProps{
+    onAddResident: (res:Resident) => void
+    onRemResident: (res:Resident) => void
+    onAddTeamMember:(teamName:string, res:Resident) => void
+    onAddTeam:(team:Team) => void
+    onRemTeam:(team:Team) => void
+    resident_ls:Resident[]
+    team_ls:Team[]
+    timeOff_ls:TimeOff[]
+}
+
+
+
+export function InputView({resident_ls, team_ls, timeOff_ls, onAddResident, onAddTeam, onRemResident, onRemTeam, onAddTeamMember}:InputViewProps){
+    return (
+    <div className="input-container">
+        <section className="form-container">
+            <ResidentForm onResidentSubmit={onAddResident}/>
+            <TeamForm onTeamSubmit={onAddTeam}/>
+            <div className="pool-container">
+                <div id='resident-pool'>
+                    <ResidentChip 
+                    team_ls={team_ls} 
+                    resident_ls={resident_ls} 
+                    onRemResident={onRemResident} 
+                    onAddTeamMember={onAddTeamMember}/>
+                </div>
+            </div>
+            <div className="pool-container">
+                <div id="team-pool">
+                    <TeamCard 
+                    onAddTeamMember={onAddTeamMember}
+                    onRemTeam={onRemTeam} 
+                    team_ls={team_ls} 
+                    resident_ls={resident_ls}
+                    onRemResident={onRemResident}/>
+                </div>
+            </div>
+        </section>
+    </div>)
 }

@@ -1,90 +1,91 @@
-import { useState } from 'react'
-import './App.css'
+import { useState, useEffect } from 'react'
 import {Sidebar} from "./components/sidebar.tsx"
 import { TopNavBar } from './components/navbar.tsx';
 import { InputView } from './views/input.tsx';
 import { SummaryView } from './views/residentSummary.tsx';
 import { ScheduleView } from './views/schedule.tsx';
+import './App.css'
 
 
-type Role = 'senior'|'mid'|'junior';
-
-interface Resident{
+export interface Resident{
   name:string;
   role:Role;
+  teamName?:string
 }
-interface TimeOff{
+export interface TimeOff{
   resident:string;
   week:number;
 }
 
+export interface Team{
+  name:string;
+}
+export type Role = 'senior'|'research'|'mid'|'junior';
 function App() {
-  let [teams, setTeams] = useState<string[]>([]);
-  let [timeOff, setTimeOff] = useState <TimeOff[]>([]);
-  let [residents, setResidents] = useState<Resident[]>([]);
-  let [activeView, setActiveView] = useState("input")
+  const [activeView, setActiveView] = useState("input")
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [timeOff, setTimeOff] = useState <TimeOff[]>([]);
+
+
+  const [residents, setResidents] = useState<Resident[]>([]);
   //assigned through resident form entering name, role
-  function add_Resident(res:Resident){
-    setResidents(prev => [...prev, res]);
+
+  const add_Resident = (res:Resident)=>{
+    setResidents(prev=>(prev.some(r=>r.name===res.name && r.role===res.role) ? prev : [...prev, res]))
+  }
+  const rem_Resident = (res:Resident)=>{
+    setResidents(prev=>(prev.some(r=>r.name===res.name && r.role==res.role)? prev.filter(r=>r.name!==res.name || r.role!==res.role) : prev))
   }
 
+  const add_Team = (team:Team)=>{
+    setTeams(prev => (prev.some(t=>t.name===team.name) ? prev : [...prev, team]));
+  }
+  const rem_Team = (team:Team)=>{
+    setTeams(prev =>(prev.some(t=>t.name===team.name)? prev.filter(t => t.name!==team.name):prev))
+  }
+
+  const add_Team_Resident = (teamName:string, res:Resident) => {
+    setResidents(prev => prev.map(r => r.name===res.name && r.role===res.role ? {...r, teamName:teamName} : r))
+  }
   // will be assigned through team form entering team name
-  function add_Team(team:string){
-    setTeams(prev => [...prev, team]);
-  }
 
-  // Will be Assigned through drag/drop on weekend cards
-  function add_Timeoff(timeOff:TimeOff){
-    // complex logic, attribute of resident for a specific week list[[res, week#]]
-    setTimeOff(prev => [...prev, timeOff]);
-  }
-
-  // SPA COMPONENTS (RE-STRUCTURE LATER!!)
-  const TeamCard = () =>{
-    return <div></div>
-  }
-  const ResidentPool = ()=>{
-    return <div></div>
-  }
-
-  const TimeOffForm = () =>{
-    return <div></div>
-  }
-
-  const ResidentForm = () =>{
-    return <div></div>
-  }
+  // // Will be Assigned through drag/drop on weekend cards
+  // const add_Timeoff=(timeOff:TimeOff)=>{
+  //     // complex logic, attribute of resident for a specific week list[[res, week#]]
+  //     setTimeOff(prev => [...prev, timeOff]);
+  // }
+  //<function>, <dependency> runs on residents change
+  useEffect(() =>{
+        console.log("Residents :", residents)
+    }, [residents])
   
-  const TeamForm = () =>{
-    return <div></div>
-  }
-
-  const ResidentChip = () =>{
-    return <div></div>
-  }
-
-  const RoleChip = () =>{
-    return <div></div>
-  }
-
-
+  useEffect(()=>
+    console.log("Teams :", teams), 
+  [teams])
 
   return (
-  <>
-    <h1>Call Scheduler</h1>
-    <div className='main'>
-      <TopNavBar onViewChange={setActiveView}/>
-      <Sidebar
-      residentCount={0}
-      teamCount={0}
+  <div className = 'page-shell'>
+    <Sidebar
+      residentCount={residents.length}
+      teamCount={teams.length}
       assignedResidents={0}
       timeOffCount={0}
       />
-      {activeView === "input" && <InputView />}
+    <main className='main-content'>
+      <TopNavBar onViewChange={setActiveView} currentView={activeView}/>
+      {activeView === "input" && <InputView 
+      team_ls={teams} 
+      timeOff_ls={timeOff} 
+      resident_ls={residents} 
+      onAddResident={add_Resident}
+      onRemResident={rem_Resident}
+      onAddTeamMember={add_Team_Resident}
+      onAddTeam={add_Team}
+      onRemTeam={rem_Team} />} 
       {activeView === "schedule" && <ScheduleView />}
       {activeView === "summary" && <SummaryView />}
-    </div>
-  </>
+    </main>
+  </div>
   )
 }
 export default App

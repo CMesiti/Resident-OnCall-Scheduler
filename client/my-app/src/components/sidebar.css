@@ -1,0 +1,85 @@
+/* =============================================
+   SIDEBAR
+   ============================================= */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: #fff;
+  border-right: 0.5px solid var(--slate-200);
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow-y: auto;
+}
+ 
+/* Primary action button in sidebar */
+.sidebar > button,
+.sidebar .run-btn {
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--teal-600);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: background 0.15s, transform 0.1s;
+}
+ 
+.sidebar > button:hover,
+.sidebar .run-btn:hover {
+  background: var(--teal-800);
+}
+ 
+.sidebar > button:active,
+.sidebar .run-btn:active {
+  transform: scale(0.98);
+}
+ 
+/* Summary section */
+.sidebar .summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 0.5px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+ 
+.sidebar .summary > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: var(--slate-600);
+  border-bottom: 0.5px solid var(--slate-100);
+  background: #fff;
+}
+ 
+.sidebar .summary > div:last-child {
+  border-bottom: none;
+}
+ 
+/* Style the count values — wrap them in <strong> or use :last-child of each item */
+.sidebar .summary > div > span:last-child,
+.sidebar .summary > div > strong {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--slate-800);
+  font-size: 13px;
+}
+ 
+/* Label above summary */
+.sidebar .summary-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--slate-600);
+  padding: 0 2px;
+}
+ 
