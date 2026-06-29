@@ -6,17 +6,12 @@ import { SummaryView } from './views/residentSummary.tsx';
 import { ScheduleView } from './views/schedule.tsx';
 import './App.css'
 
-
 export interface Resident{
   name:string;
   role:Role;
   teamName?:string
+  timeOff:Set<number>
 }
-export interface TimeOff{
-  resident:string;
-  week:number;
-}
-
 export interface Team{
   name:string;
 }
@@ -24,36 +19,44 @@ export type Role = 'senior'|'research'|'mid'|'junior';
 function App() {
   const [activeView, setActiveView] = useState("input")
   const [teams, setTeams] = useState<Team[]>([]);
-  const [timeOff, setTimeOff] = useState <TimeOff[]>([]);
-
-
   const [residents, setResidents] = useState<Resident[]>([]);
   //assigned through resident form entering name, role
 
   const add_Resident = (res:Resident)=>{
-    setResidents(prev=>(prev.some(r=>r.name===res.name && r.role===res.role) ? prev : [...prev, res]))
+    setResidents(prev =>
+      (prev.some(r=>r.name===res.name && r.role===res.role) 
+      ? prev 
+      : [...prev, res]))
   }
   const rem_Resident = (res:Resident)=>{
-    setResidents(prev=>(prev.some(r=>r.name===res.name && r.role==res.role)? prev.filter(r=>r.name!==res.name || r.role!==res.role) : prev))
+    setResidents(prev => 
+      (prev.some(r=>r.name===res.name && r.role==res.role)
+      ? prev.filter(r=>r.name!==res.name || r.role!==res.role) 
+      : prev))
   }
 
   const add_Team = (team:Team)=>{
-    setTeams(prev => (prev.some(t=>t.name===team.name) ? prev : [...prev, team]));
+    setTeams(prev => 
+      (prev.some(t=>t.name===team.name) 
+      ? prev 
+      : [...prev, team]));
   }
   const rem_Team = (team:Team)=>{
-    setTeams(prev =>(prev.some(t=>t.name===team.name)? prev.filter(t => t.name!==team.name):prev))
+    setTeams(prev => 
+      (prev.some(t=>t.name===team.name)
+      ? prev.filter(t => t.name!==team.name)
+      :prev ))
   }
 
   const add_Team_Resident = (teamName:string, res:Resident) => {
-    setResidents(prev => prev.map(r => r.name===res.name && r.role===res.role ? {...r, teamName:teamName} : r))
+    setResidents(prev => 
+      (prev.map(r => r.name===res.name && r.role===res.role ? {...r, teamName:teamName} : r)))
   }
-  // will be assigned through team form entering team name
 
-  // // Will be Assigned through drag/drop on weekend cards
-  // const add_Timeoff=(timeOff:TimeOff)=>{
-  //     // complex logic, attribute of resident for a specific week list[[res, week#]]
-  //     setTimeOff(prev => [...prev, timeOff]);
-  // }
+  const add_Time_Off = (res:Resident, week:number) => {
+    setResidents(prev => 
+      (prev.map(r => r.name===res.name && r.role===res.role ? {...r, timeOff: new Set([...r.timeOff, week])} : r)))
+  }
   //<function>, <dependency> runs on residents change
   useEffect(() =>{
         console.log("Residents :", residents)
@@ -75,7 +78,6 @@ function App() {
       <TopNavBar onViewChange={setActiveView} currentView={activeView}/>
       {activeView === "input" && <InputView 
       team_ls={teams} 
-      timeOff_ls={timeOff} 
       resident_ls={residents} 
       onAddResident={add_Resident}
       onRemResident={rem_Resident}

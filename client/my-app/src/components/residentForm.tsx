@@ -13,9 +13,11 @@ const ResidentForm = ({onResidentSubmit}:ResidentFormProps) => {
     function handleSubmit(e:React.SubmitEvent<HTMLFormElement>){
         e.preventDefault();
         console.log(resName, resRole)
-        onResidentSubmit({
+        let isEmpty = resName === "";
+        !isEmpty && onResidentSubmit({
             name:resName,
-            role:resRole
+            role:resRole,
+            timeOff:new Set()
         })
         setResName("")
     }

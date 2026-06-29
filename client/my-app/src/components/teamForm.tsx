@@ -13,7 +13,8 @@ const TeamForm = ({onTeamSubmit}:TeamFormProps) => {
     function handleSubmit(e:React.SubmitEvent<HTMLFormElement>){
         e.preventDefault();
         console.log(teamName)
-        onTeamSubmit({name:teamName, residents:[]})
+        let isEmpty = teamName === "";
+        !isEmpty && onTeamSubmit({name:teamName})
         setTeamName("")
     }
     return (    

@@ -2,7 +2,7 @@ import {ResidentForm} from "../components/residentForm.tsx"
 import { TeamForm } from "../components/teamForm.tsx";
 import { ResidentChip } from "../components/residentChip.tsx";
 import { TeamCard } from "../components/teamCard.tsx";
-import type {Resident, TimeOff, Team} from "../App.tsx"
+import type {Resident, Team} from "../App.tsx"
 
 import "./input.css"
 
@@ -14,12 +14,11 @@ interface InputViewProps{
     onRemTeam:(team:Team) => void
     resident_ls:Resident[]
     team_ls:Team[]
-    timeOff_ls:TimeOff[]
 }
 
 
 
-export function InputView({resident_ls, team_ls, timeOff_ls, onAddResident, onAddTeam, onRemResident, onRemTeam, onAddTeamMember}:InputViewProps){
+export function InputView({resident_ls, team_ls, onAddResident, onAddTeam, onRemResident, onRemTeam, onAddTeamMember}:InputViewProps){
     return (
     <div className="input-container">
         <section className="form-container">
