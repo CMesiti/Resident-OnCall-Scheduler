@@ -53,11 +53,26 @@ function App() {
       (prev.map(r => r.name===res.name && r.role===res.role ? {...r, teamName:teamName} : r)))
   }
 
-  const add_Time_Off = (res:Resident, week:number) => {
-    setResidents(prev => 
-      (prev.map(r => r.name===res.name && r.role===res.role ? {...r, timeOff: new Set([...r.timeOff, week])} : r)))
+  const toggle_Time_Off = (res: Resident, weekend: number) => {
+      setResidents(prev =>
+          prev.map(r => {
+              if (r.name !== res.name || r.role !== res.role) return r
+              const next = new Set(r.timeOff)
+              next.has(weekend) ? next.delete(weekend) : next.add(weekend) //toggle statement
+              return { ...r, timeOff: next }
+          })
+      )
   }
-  //<function>, <dependency> runs on residents change
+
+  const get_TimeOff_Sum = () => {
+    //counts length of each time off and adds to a total
+    let total = 0
+    residents.forEach(r => {
+      total += r.timeOff.size
+    });
+    return total
+  }
+    //<function>, <dependency> runs on residents change
   useEffect(() =>{
         console.log("Residents :", residents)
     }, [residents])
@@ -72,7 +87,7 @@ function App() {
       residentCount={residents.length}
       teamCount={teams.length}
       assignedResidents={0}
-      timeOffCount={0}
+      timeOffCount={get_TimeOff_Sum()}
       />
     <main className='main-content'>
       <TopNavBar onViewChange={setActiveView} currentView={activeView}/>
@@ -82,6 +97,7 @@ function App() {
       onAddResident={add_Resident}
       onRemResident={rem_Resident}
       onAddTeamMember={add_Team_Resident}
+      onToggleWeekend={toggle_Time_Off}
       onAddTeam={add_Team}
       onRemTeam={rem_Team} />} 
       {activeView === "schedule" && <ScheduleView />}

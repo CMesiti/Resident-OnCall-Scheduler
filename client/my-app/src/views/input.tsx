@@ -12,13 +12,14 @@ interface InputViewProps{
     onAddTeamMember:(teamName:string, res:Resident) => void
     onAddTeam:(team:Team) => void
     onRemTeam:(team:Team) => void
+    onToggleWeekend: (res: Resident, weekend: number) => void;
     resident_ls:Resident[]
     team_ls:Team[]
 }
 
 
 
-export function InputView({resident_ls, team_ls, onAddResident, onAddTeam, onRemResident, onRemTeam, onAddTeamMember}:InputViewProps){
+export function InputView({resident_ls, team_ls, onAddResident, onAddTeam, onRemResident, onRemTeam, onAddTeamMember, onToggleWeekend}:InputViewProps){
     return (
     <div className="input-container">
         <section className="form-container">
@@ -30,7 +31,8 @@ export function InputView({resident_ls, team_ls, onAddResident, onAddTeam, onRem
                     team_ls={team_ls} 
                     resident_ls={resident_ls} 
                     onRemResident={onRemResident} 
-                    onAddTeamMember={onAddTeamMember}/>
+                    onAddTeamMember={onAddTeamMember}
+                    onToggleWeekend={onToggleWeekend}/>
                 </div>
             </div>
             <div className="pool-container">

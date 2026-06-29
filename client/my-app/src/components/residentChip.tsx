@@ -1,6 +1,7 @@
 import "./residentChip.css"
 import type { Resident, Team } from "../App";
 import type React from "react";
+import { WeekendSelect } from "./WeekendSelect";
 
 
 interface ResidentChipProps {
@@ -8,6 +9,7 @@ interface ResidentChipProps {
     resident_ls: Resident[];
     onRemResident: (r: Resident) => void;
     onAddTeamMember: (teamName:string, r:Resident) => void;
+    onToggleWeekend: (res: Resident, weekend: number) => void;
 }
 
 const roleBadgeClass: Record<string, string> = {
@@ -19,7 +21,7 @@ const roleBadgeClass: Record<string, string> = {
  
 
 //Same mistake here as team card, this should be a single chip and not a render of the whole list. (REFORMAT LATER!!!)
-const ResidentChip = ({ team_ls, resident_ls, onRemResident, onAddTeamMember}: ResidentChipProps) => {
+const ResidentChip = ({ team_ls, resident_ls, onRemResident, onAddTeamMember, onToggleWeekend}: ResidentChipProps) => {
     if (resident_ls.length === 0) {
         return <p className="chip-empty">No residents added yet.</p>
     }
@@ -36,6 +38,10 @@ const ResidentChip = ({ team_ls, resident_ls, onRemResident, onAddTeamMember}: R
                             {r.role}
                         </span>
                         <span className="chip-name">{r.name}</span>
+                        <WeekendSelect
+                        resident={r}
+                        onWeekendToggle={onToggleWeekend}
+                        />
                         <select 
                         value={r.teamName ?? ''} 
                         onChange={(e) => handleTeamSelect(r, e)}
