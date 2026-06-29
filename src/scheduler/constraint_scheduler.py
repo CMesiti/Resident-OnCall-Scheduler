@@ -1,4 +1,25 @@
 from ortools.sat.python import cp_model
+def unpack_input(input):
+   residents = [r.name for r in input.residents]
+   teams = {} #populate dict with teams as keys
+   for r in input.residents:
+      if r.team in teams:
+         teams[r.team].append(r.name)
+      else:
+         teams[r.team] = [r.name]
+   weekends = input.weekends
+   calls = ['A', 'B']
+   time_off= [(r.name, t) for r in input.residents for t in r.time_off]
+   roles = {r.name:r.role for r in input.residents}
+   seniors = [r.name for r in input.residents if r.role=='senior']
+   return {"residents":residents, 
+           "teams":teams, 
+           "weekends":weekends, 
+           "calls":calls, 
+           "time_off":time_off, 
+           "roles":roles, 
+           "seniors":seniors}
+   
 
 def cp_resident_scheduler(residents, teams, weekends, calls, time_off, roles, seniors):
   model = cp_model.CpModel()

@@ -5,6 +5,7 @@ description = "Scheduling Algorithm and Simple UI for Chief resident scheduling 
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "fastapi[standard]>=0.138.2",
     "ortools>=9.15.6755",
     "streamlit>=1.56.0",
 ]

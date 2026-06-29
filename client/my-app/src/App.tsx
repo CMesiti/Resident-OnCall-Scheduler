@@ -15,13 +15,36 @@ export interface Resident{
 export interface Team{
   name:string;
 }
+
+interface Schedule{
+
+}
 export type Role = 'senior'|'research'|'mid'|'junior';
 function App() {
   const [activeView, setActiveView] = useState("input")
   const [teams, setTeams] = useState<Team[]>([]);
   const [residents, setResidents] = useState<Resident[]>([]);
-  //assigned through resident form entering name, role
 
+
+  //assigned through resident form entering name, role
+  async function create_Schedule(){
+    const payload = {
+    residents: residents.map(r => ({
+        name: r.name,
+        role: r.role,
+        team: r.teamName ?? "",
+        time_off: [...r.timeOff],
+    })),
+    weekends: [0, 1, 2, 3]}
+    console.log("Sending Request to API...", payload)
+    const res = await fetch("http://localhost:8000/scheduler", {
+    method: 'POST',
+    headers: {"Content-Type": "application/json", "Accept": "application/json"},
+    body: JSON.stringify(payload)
+    })
+    console.log(res.json)
+    return 
+  }
   const add_Resident = (res:Resident)=>{
     setResidents(prev =>
       (prev.some(r=>r.name===res.name && r.role===res.role) 
@@ -88,6 +111,7 @@ function App() {
       teamCount={teams.length}
       assignedResidents={0}
       timeOffCount={get_TimeOff_Sum()}
+      onCreateSchedule={create_Schedule}
       />
     <main className='main-content'>
       <TopNavBar onViewChange={setActiveView} currentView={activeView}/>

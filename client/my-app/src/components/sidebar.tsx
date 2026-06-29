@@ -4,15 +4,19 @@ interface SidebarProps {
     teamCount: number;
     timeOffCount: number;
     assignedResidents: number;
+    onCreateSchedule: () => void;
 }
+
 const Sidebar = (
     {assignedResidents, 
     residentCount, 
     teamCount, 
-    timeOffCount}:SidebarProps) => {
+    timeOffCount,
+    onCreateSchedule}:SidebarProps) => {
+
     return (
         <div className="sidebar">
-            <button className='run-btn'>Run Constrain-Scheduler</button>
+            <button className='run-btn' onClick={onCreateSchedule}>Run Constrain-Scheduler</button>
             <div>
                 <p className='summary-label'>Overview</p>
                 <section className='summary'>
