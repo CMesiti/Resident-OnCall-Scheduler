@@ -9,7 +9,7 @@ def unpack_input(input):
          teams[r.team] = [r.name]
    weekends = input.weekends
    calls = ['A', 'B']
-   time_off= [(r.name, t) for r in input.residents for t in r.time_off]
+   time_off= [(r.name, t-1) for r in input.residents for t in r.time_off]
    roles = {r.name:r.role for r in input.residents}
    seniors = [r.name for r in input.residents if r.role=='senior']
    return {"residents":residents, 
@@ -123,6 +123,7 @@ def cp_resident_scheduler(residents, teams, weekends, calls, time_off, roles, se
   # -----------------------------
   # Solve/Output
   # -----------------------------
+  print("SOLVING....")
   solver = cp_model.CpSolver()
   solver.parameters.linearization_level = 0
   # Enumerate all solutions. Set as Bool flag, if no optimal enumerate all.

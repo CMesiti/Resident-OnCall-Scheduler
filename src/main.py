@@ -51,6 +51,7 @@ def create_schedule(input: InputModel):
         print(schedule_data)
         schedule_package, feedback = cp_resident_scheduler(**schedule_data)
     except Exception as e:
-        print(e)
+        print("ERROR Processing Data: ", e)
+        feedback = f"ERROR Processing Data: {e}"
     return  {"schedule": schedule_package, "feedback": feedback}
 

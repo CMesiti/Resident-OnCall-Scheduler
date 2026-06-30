@@ -1,20 +1,22 @@
 import {useState} from "react"
 import "./forms.css"
-import type { Team } from "../App";
-interface TeamFormProps{
-    onTeamSubmit: (team:Team) => void;
-};
+import { useContext } from "react"
+import SchedulerContext from "../context/schedulerContext"
+// interface TeamFormProps{
+//     onTeamSubmit: (team:Team) => void;
+// };
 
-const TeamForm = ({onTeamSubmit}:TeamFormProps) => {
+const TeamForm = () => {
     //variables to handle inputs
     let [teamName, setTeamName] = useState<string>("")
+    const schedulerContext = useContext(SchedulerContext)
 
     //submit event handler.
     function handleSubmit(e:React.SubmitEvent<HTMLFormElement>){
         e.preventDefault();
         console.log(teamName)
         let isEmpty = teamName === "";
-        !isEmpty && onTeamSubmit({name:teamName})
+        !isEmpty && schedulerContext?.add_Team({name:teamName})
         setTeamName("")
     }
     return (    

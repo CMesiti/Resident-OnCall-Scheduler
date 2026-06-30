@@ -2,47 +2,36 @@ import {ResidentForm} from "../components/residentForm.tsx"
 import { TeamForm } from "../components/teamForm.tsx";
 import { ResidentChip } from "../components/residentChip.tsx";
 import { TeamCard } from "../components/teamCard.tsx";
-import type {Resident, Team} from "../App.tsx"
-
 import "./input.css"
+import { useContext } from "react";
+import SchedulerContext from "../context/schedulerContext.ts";
 
-interface InputViewProps{
-    onAddResident: (res:Resident) => void
-    onRemResident: (res:Resident) => void
-    onAddTeamMember:(teamName:string, res:Resident) => void
-    onAddTeam:(team:Team) => void
-    onRemTeam:(team:Team) => void
-    onToggleWeekend: (res: Resident, weekend: number) => void;
-    resident_ls:Resident[]
-    team_ls:Team[]
-}
-
-
-
-export function InputView({resident_ls, team_ls, onAddResident, onAddTeam, onRemResident, onRemTeam, onAddTeamMember, onToggleWeekend}:InputViewProps){
+// interface InputViewProps{
+//     onToggleWeekend: (res: Resident, weekend: number) => void;
+//     resident_ls:Resident[]
+//     onAddResident: (res:Resident) => void
+//     onRemResident: (res:Resident) => void
+//     onAddTeamMember:(teamName:string, res:Resident) => void
+//     onAddTeam:(team:Team) => void
+//     onRemTeam:(team:Team) => void
+//     team_ls:Team[]
+// }
+export function InputView(){
+    const scheduleContext=useContext(SchedulerContext)
+    let residents = scheduleContext?.residents
     return (
     <div className="input-container">
         <section className="form-container">
-            <ResidentForm onResidentSubmit={onAddResident}/>
-            <TeamForm onTeamSubmit={onAddTeam}/>
+            <ResidentForm />
+            <TeamForm />
             <div className="pool-container">
                 <div id='resident-pool'>
-                    <ResidentChip 
-                    team_ls={team_ls} 
-                    resident_ls={resident_ls} 
-                    onRemResident={onRemResident} 
-                    onAddTeamMember={onAddTeamMember}
-                    onToggleWeekend={onToggleWeekend}/>
+                    <ResidentChip resident_ls={residents} />
                 </div>
             </div>
             <div className="pool-container">
                 <div id="team-pool">
-                    <TeamCard 
-                    onAddTeamMember={onAddTeamMember}
-                    onRemTeam={onRemTeam} 
-                    team_ls={team_ls} 
-                    resident_ls={resident_ls}
-                    onRemResident={onRemResident}/>
+                    <TeamCard />
                 </div>
             </div>
         </section>

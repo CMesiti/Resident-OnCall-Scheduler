@@ -1,12 +1,16 @@
-import type {Role, Resident} from "../App.tsx"
+import type {Role, Resident} from "../types/inputTypes"
 import {useState} from "react"
+import { useContext } from "react"
+import SchedulerContext from "../context/schedulerContext"
 import "./forms.css"
-interface ResidentFormProps{
-    onResidentSubmit: (res:Resident) => void;
-};
+// interface ResidentFormProps{
+//     onResidentSubmit: (res:Resident) => void;
+// };
 //Controlled component
-const ResidentForm = ({onResidentSubmit}:ResidentFormProps) => {
+const ResidentForm = () => {
     //variables to handle inputs
+    const schedulerContext = useContext(SchedulerContext)
+    
     let [resName, setResName] = useState<string>("")
     let [resRole, setResRole] = useState<Role>("senior")
     //submit event handler.
@@ -14,7 +18,7 @@ const ResidentForm = ({onResidentSubmit}:ResidentFormProps) => {
         e.preventDefault();
         console.log(resName, resRole)
         let isEmpty = resName === "";
-        !isEmpty && onResidentSubmit({
+        !isEmpty && schedulerContext?.add_Resident({
             name:resName,
             role:resRole,
             timeOff:new Set()
